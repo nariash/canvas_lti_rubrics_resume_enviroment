@@ -1,0 +1,73 @@
+FROM php:8.2-apache
+
+ARG APP_REPOSITORY
+ENV APP_DOMAIN APP_DOMAIN_UNDEFINED
+ENV LARAVEL_APP_NAME laravel_app_name_undefined
+ENV LARAVEL_APP_ENV laravel_app_env_undefined
+ENV LARAVEL_APP_KEY laravel_app_key_undefined
+ENV LARAVEL_APP_DEBUG laravel_app_debug_undefined
+ENV LARAVEL_APP_TIMEZONE laravel_app_timezone_undefined
+ENV LARAVEL_APP_URL laravel_app_url_undefined
+ENV LARAVEL_APP_LOCALE laravel_app_locale_undefined
+ENV LARAVEL_APP_FALLBACK_LOCALE laravel_app_fallback_locale_undefined
+ENV LARAVEL_APP_FAKER_LOCALE laravel_app_faker_locale_undefined
+ENV LARAVEL_APP_MAINTENANCE_DRIVER laravel_app_maintenance_driver_undefined
+ENV LARAVEL_APP_MAINTENANCE_STORE laravel_app_maintenance_store_undefined
+ENV LARAVEL_BCRYPT_ROUNDS laravel_bcrypt_rounds_undefined
+ENV LARAVEL_LOG_CHANNEL laravel_log_channel_undefined
+ENV LARAVEL_LOG_STACK laravel_log_stack_undefined
+ENV LARAVEL_LOG_DEPRECATIONS_CHANNEL laravel_log_deprecations_channel_undefined
+ENV LARAVEL_LOG_LEVEL laravel_log_level_undefined
+ENV LARAVEL_DB_CONNECTION laravel_db_connection_undefined
+ENV LARAVEL_DB_HOST laravel_db_host_undefined
+ENV LARAVEL_DB_PORT laravel_db_port_undefined
+ENV LARAVEL_DB_DATABASE laravel_db_database_undefined
+ENV LARAVEL_DB_USERNAME laravel_db_username_undefined
+ENV LARAVEL_DB_PASSWORD laravel_db_password_undefined
+ENV LARAVEL_SESSION_DRIVER laravel_session_driver_undefined
+ENV LARAVEL_SESSION_LIFETIME laravel_session_lifetime_undefined
+ENV LARAVEL_SESSION_ENCRYPT laravel_session_encrypt_undefined
+ENV LARAVEL_SESSION_PATH laravel_session_path_undefined
+ENV LARAVEL_SESSION_DOMAIN laravel_session_domain_undefined
+ENV LARAVEL_BROADCAST_CONNECTION laravel_broadcast_connection_undefined
+ENV LARAVEL_FILESYSTEM_DISK laravel_filesystem_disk_undefined
+ENV LARAVEL_QUEUE_CONNECTION laravel_queue_connection_undefined
+ENV LARAVEL_CACHE_STORE laravel_cache_store_undefined
+ENV LARAVEL_CACHE_PREFIX laravel_cache_prefix_undefined
+ENV LARAVEL_MEMCACHED_HOST laravel_memcached_host_undefined
+ENV LARAVEL_REDIS_CLIENT laravel_redis_client_undefined
+ENV LARAVEL_REDIS_HOST laravel_redis_host_undefined
+ENV LARAVEL_REDIS_PASSWORD laravel_redis_password_undefined
+ENV LARAVEL_REDIS_PORT laravel_redis_port_undefined
+ENV LARAVEL_MAIL_MAILER laravel_mail_mailer_undefined
+ENV LARAVEL_MAIL_HOST laravel_mail_host_undefined
+ENV LARAVEL_MAIL_PORT laravel_mail_port_undefined
+ENV LARAVEL_MAIL_USERNAME laravel_mail_username_undefined
+ENV LARAVEL_MAIL_PASSWORD laravel_mail_password_undefined
+ENV LARAVEL_MAIL_ENCRYPTION laravel_mail_encryption_undefined
+ENV LARAVEL_MAIL_FROM_ADDRESS laravel_mail_from_address_undefined
+ENV LARAVEL_MAIL_FROM_NAME laravel_mail_from_name_undefined
+ENV LARAVEL_AWS_ACCESS_KEY_ID laravel_aws_access_key_id_undefined
+ENV LARAVEL_AWS_SECRET_ACCESS_KEY laravel_aws_secret_access_key_undefined
+ENV LARAVEL_AWS_DEFAULT_REGION laravel_aws_default_region_undefined
+ENV LARAVEL_AWS_BUCKET laravel_aws_bucket_undefined
+ENV LARAVEL_AWS_USE_PATH_STYLE_ENDPOINT laravel_aws_use_path_style_endpoint_undefined
+ENV LARAVEL_VITE_APP_NAME laravel_vite_app_name_undefined
+ENV LARAVEL_CANVAS_TOKEN laravel_canvas_token_undefined
+ENV LARAVEL_LTI1P3_ADMIN_USERNAME laravel_lti1p3_admin_username_undefined
+ENV LARAVEL_LTI1P3_ADMIN_PASSWORD laravel_lti1p3_admin_password_undefined
+ENV LARAVEL_CANVAS_URL laravel_canvas_url_undefined
+
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+COPY /SettingsFiles/app/init.sh /tmp/init.sh
+COPY /SettingsFiles/app/php.ini "$PHP_INI_DIR/php.ini"
+ADD https://github.com/krallin/tini/releases/download/v0.19.0/tini-amd64 /tini
+RUN chmod 755 /tini && chmod 755 /tmp/init.sh
+RUN apt-get -y update && \
+    apt-get -y upgrade && \
+    apt-get install -y git zip unzip libzip-dev libpng-dev libpq-dev && \
+    docker-php-ext-install pdo pdo_pgsql pgsql zip gd
+RUN a2enmod rewrite
+RUN git clone $APP_REPOSITORY /tmp/pre_stage_app
+WORKDIR /var/www/html
+ENTRYPOINT ["/tini", "--", "/tmp/init.sh"]
