@@ -53,10 +53,8 @@ ENV LARAVEL_AWS_DEFAULT_REGION laravel_aws_default_region_undefined
 ENV LARAVEL_AWS_BUCKET laravel_aws_bucket_undefined
 ENV LARAVEL_AWS_USE_PATH_STYLE_ENDPOINT laravel_aws_use_path_style_endpoint_undefined
 ENV LARAVEL_VITE_APP_NAME laravel_vite_app_name_undefined
-ENV LARAVEL_CANVAS_TOKEN laravel_canvas_token_undefined
 ENV LARAVEL_LTI1P3_ADMIN_USERNAME laravel_lti1p3_admin_username_undefined
 ENV LARAVEL_LTI1P3_ADMIN_PASSWORD laravel_lti1p3_admin_password_undefined
-ENV LARAVEL_CANVAS_URL laravel_canvas_url_undefined
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 COPY /SettingsFiles/app/init.sh /tmp/init.sh
