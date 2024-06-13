@@ -1,106 +1,136 @@
 version: "3.9"
 services:
-    lti_database:
-      container_name: lti_database
-      image: "postgres:16.2"
-      environment:
-        POSTGRES_DB: ${DATABASE_NAME}
-        POSTGRES_USER: ${DATABASE_USERNAME}
-        POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-        PGDATA: /var/lib/postgresql/data/pgdata
-      volumes:
-        - lti_db:/var/lib/postgresql/data
-      healthcheck:
-        test: ["CMD-SHELL", "sh -c 'pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}'"]
-        interval: 10s
-        timeout: 3s
-        retries: 10
-      restart: always
-    lti:
-        container_name: lti
-        build:
-            context: "." 
-            dockerfile: "./Dockerfiles/App"
-            args:
-            - APP_REPOSITORY=${APP_REPOSITORY}
-        environment:
-            DATABASE_NAME: ${DATABASE_NAME}
-            DATABASE_USERNAME: ${DATABASE_USERNAME}
-            DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-            APP_DOMAIN: ${APP_DOMAIN}
-            LARAVEL_APP_NAME: ${LARAVEL_APP_NAME}
-            LARAVEL_APP_ENV: ${LARAVEL_APP_ENV}
-            LARAVEL_APP_KEY: ${LARAVEL_APP_KEY}
-            LARAVEL_APP_DEBUG: ${LARAVEL_APP_DEBUG}
-            LARAVEL_APP_TIMEZONE: ${LARAVEL_APP_TIMEZONE}
-            LARAVEL_APP_URL: ${LARAVEL_APP_URL}
-            LARAVEL_APP_LOCALE: ${LARAVEL_APP_LOCALE}
-            LARAVEL_APP_FALLBACK_LOCALE: ${LARAVEL_APP_FALLBACK_LOCALE}
-            LARAVEL_APP_FAKER_LOCALE: ${LARAVEL_APP_FAKER_LOCALE}
-            LARAVEL_APP_MAINTENANCE_DRIVER: ${LARAVEL_APP_MAINTENANCE_DRIVER}
-            LARAVEL_APP_MAINTENANCE_STORE: ${LARAVEL_APP_MAINTENANCE_STORE}
-            LARAVEL_BCRYPT_ROUNDS: ${LARAVEL_BCRYPT_ROUNDS}
-            LARAVEL_LOG_CHANNEL: ${LARAVEL_LOG_CHANNEL}
-            LARAVEL_LOG_STACK: ${LARAVEL_LOG_STACK}
-            LARAVEL_LOG_DEPRECATIONS_CHANNEL: ${LARAVEL_LOG_DEPRECATIONS_CHANNEL}
-            LARAVEL_LOG_LEVEL: ${LARAVEL_LOG_LEVEL}
-            LARAVEL_DB_CONNECTION: ${LARAVEL_DB_CONNECTION}
-            LARAVEL_DB_HOST: ${LARAVEL_DB_HOST}
-            LARAVEL_DB_PORT: ${LARAVEL_DB_PORT}
-            LARAVEL_DB_DATABASE: ${LARAVEL_DB_DATABASE}
-            LARAVEL_DB_USERNAME: ${LARAVEL_DB_USERNAME}
-            LARAVEL_DB_PASSWORD: ${LARAVEL_DB_PASSWORD}
-            LARAVEL_SESSION_DRIVER: ${LARAVEL_SESSION_DRIVER}
-            LARAVEL_SESSION_LIFETIME: ${LARAVEL_SESSION_LIFETIME}
-            LARAVEL_SESSION_ENCRYPT: ${LARAVEL_SESSION_ENCRYPT}
-            LARAVEL_SESSION_PATH: ${LARAVEL_SESSION_PATH}
-            LARAVEL_SESSION_DOMAIN: ${LARAVEL_SESSION_DOMAIN}
-            LARAVEL_BROADCAST_CONNECTION: ${LARAVEL_BROADCAST_CONNECTION}
-            LARAVEL_FILESYSTEM_DISK: ${LARAVEL_FILESYSTEM_DISK}
-            LARAVEL_QUEUE_CONNECTION: ${LARAVEL_QUEUE_CONNECTION}
-            LARAVEL_CACHE_STORE: ${LARAVEL_CACHE_STORE}
-            LARAVEL_CACHE_PREFIX: ${LARAVEL_CACHE_PREFIX}
-            LARAVEL_MEMCACHED_HOST: ${LARAVEL_MEMCACHED_HOST}
-            LARAVEL_REDIS_CLIENT: ${LARAVEL_REDIS_CLIENT}
-            LARAVEL_REDIS_HOST: ${LARAVEL_REDIS_HOST}
-            LARAVEL_REDIS_PASSWORD: ${LARAVEL_REDIS_PASSWORD}
-            LARAVEL_REDIS_PORT: ${LARAVEL_REDIS_PORT}
-            LARAVEL_MAIL_MAILER: ${LARAVEL_MAIL_MAILER}
-            LARAVEL_MAIL_HOST: ${LARAVEL_MAIL_HOST}
-            LARAVEL_MAIL_PORT: ${LARAVEL_MAIL_PORT}
-            LARAVEL_MAIL_USERNAME: ${LARAVEL_MAIL_USERNAME}
-            LARAVEL_MAIL_PASSWORD: ${LARAVEL_MAIL_PASSWORD}
-            LARAVEL_MAIL_ENCRYPTION: ${LARAVEL_MAIL_ENCRYPTION}
-            LARAVEL_MAIL_FROM_ADDRESS: ${LARAVEL_MAIL_FROM_ADDRESS}
-            LARAVEL_MAIL_FROM_NAME: ${LARAVEL_MAIL_FROM_NAME}
-            LARAVEL_AWS_ACCESS_KEY_ID: ${LARAVEL_AWS_ACCESS_KEY_ID}
-            LARAVEL_AWS_SECRET_ACCESS_KEY: ${LARAVEL_AWS_SECRET_ACCESS_KEY}
-            LARAVEL_AWS_DEFAULT_REGION: ${LARAVEL_AWS_DEFAULT_REGION}
-            LARAVEL_AWS_BUCKET: ${LARAVEL_AWS_BUCKET}
-            LARAVEL_AWS_USE_PATH_STYLE_ENDPOINT: ${LARAVEL_AWS_USE_PATH_STYLE_ENDPOINT}
-            LARAVEL_VITE_APP_NAME: ${LARAVEL_VITE_APP_NAME}
-            LARAVEL_LTI1P3_ADMIN_USERNAME: ${LARAVEL_LTI1P3_ADMIN_USERNAME}
-            LARAVEL_LTI1P3_ADMIN_PASSWORD: ${LARAVEL_LTI1P3_ADMIN_PASSWORD}
-            
-        image: "lti:0.1.0"
-        dns:
-          - 8.8.8.8
-          - 8.8.4.4
-        volumes:
-            - type: bind
-              source: ${APP_CODE_DIR}
-              target: /var/www/html
-        restart: always
-        depends_on:
-            lti_database:
-                condition: service_healthy
-        labels:
-            - "traefik.http.routers.lti.rule=Host(`${APP_DOMAIN}`)"
-            - "traefik.http.routers.lti.tls=true"
-            - "traefik.http.routers.lti.entrypoints=websecure"
+  lti_rubric_resume_database:
+    container_name: lti_rubric_resume_database
+    image: "postgres:16.2"
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - lti_rubric_resume_db:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "sh -c 'pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}'"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    restart: always
+  lti_rubric_resume:
+    container_name: lti_rubric_resume
+    build:
+      context: "."
+      dockerfile: "./Dockerfiles/App"
+      args:
+        - APP_REPOSITORY=${APP_REPOSITORY}
+    environment:
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      APP_DOMAIN: ${APP_DOMAIN}
+      LARAVEL_APP_NAME: ${LARAVEL_APP_NAME}
+      LARAVEL_APP_ENV: ${LARAVEL_APP_ENV}
+      LARAVEL_APP_KEY: ${LARAVEL_APP_KEY}
+      LARAVEL_APP_DEBUG: ${LARAVEL_APP_DEBUG}
+      LARAVEL_APP_TIMEZONE: ${LARAVEL_APP_TIMEZONE}
+      LARAVEL_APP_URL: ${LARAVEL_APP_URL}
+      LARAVEL_APP_LOCALE: ${LARAVEL_APP_LOCALE}
+      LARAVEL_APP_FALLBACK_LOCALE: ${LARAVEL_APP_FALLBACK_LOCALE}
+      LARAVEL_APP_FAKER_LOCALE: ${LARAVEL_APP_FAKER_LOCALE}
+      LARAVEL_APP_MAINTENANCE_DRIVER: ${LARAVEL_APP_MAINTENANCE_DRIVER}
+      LARAVEL_APP_MAINTENANCE_STORE: ${LARAVEL_APP_MAINTENANCE_STORE}
+      LARAVEL_BCRYPT_ROUNDS: ${LARAVEL_BCRYPT_ROUNDS}
+      LARAVEL_LOG_CHANNEL: ${LARAVEL_LOG_CHANNEL}
+      LARAVEL_LOG_STACK: ${LARAVEL_LOG_STACK}
+      LARAVEL_LOG_DEPRECATIONS_CHANNEL: ${LARAVEL_LOG_DEPRECATIONS_CHANNEL}
+      LARAVEL_LOG_LEVEL: ${LARAVEL_LOG_LEVEL}
+      LARAVEL_DB_CONNECTION: ${LARAVEL_DB_CONNECTION}
+      LARAVEL_DB_HOST: ${LARAVEL_DB_HOST}
+      LARAVEL_DB_PORT: ${LARAVEL_DB_PORT}
+      LARAVEL_DB_DATABASE: ${LARAVEL_DB_DATABASE}
+      LARAVEL_DB_USERNAME: ${LARAVEL_DB_USERNAME}
+      LARAVEL_DB_PASSWORD: ${LARAVEL_DB_PASSWORD}
+      LARAVEL_SESSION_DRIVER: ${LARAVEL_SESSION_DRIVER}
+      LARAVEL_SESSION_LIFETIME: ${LARAVEL_SESSION_LIFETIME}
+      LARAVEL_SESSION_ENCRYPT: ${LARAVEL_SESSION_ENCRYPT}
+      LARAVEL_SESSION_PATH: ${LARAVEL_SESSION_PATH}
+      LARAVEL_SESSION_DOMAIN: ${LARAVEL_SESSION_DOMAIN}
+      LARAVEL_BROADCAST_CONNECTION: ${LARAVEL_BROADCAST_CONNECTION}
+      LARAVEL_FILESYSTEM_DISK: ${LARAVEL_FILESYSTEM_DISK}
+      LARAVEL_QUEUE_CONNECTION: ${LARAVEL_QUEUE_CONNECTION}
+      LARAVEL_CACHE_STORE: ${LARAVEL_CACHE_STORE}
+      LARAVEL_CACHE_PREFIX: ${LARAVEL_CACHE_PREFIX}
+      LARAVEL_MEMCACHED_HOST: ${LARAVEL_MEMCACHED_HOST}
+      LARAVEL_REDIS_CLIENT: ${LARAVEL_REDIS_CLIENT}
+      LARAVEL_REDIS_HOST: ${LARAVEL_REDIS_HOST}
+      LARAVEL_REDIS_PASSWORD: ${LARAVEL_REDIS_PASSWORD}
+      LARAVEL_REDIS_PORT: ${LARAVEL_REDIS_PORT}
+      LARAVEL_MAIL_MAILER: ${LARAVEL_MAIL_MAILER}
+      LARAVEL_MAIL_HOST: ${LARAVEL_MAIL_HOST}
+      LARAVEL_MAIL_PORT: ${LARAVEL_MAIL_PORT}
+      LARAVEL_MAIL_USERNAME: ${LARAVEL_MAIL_USERNAME}
+      LARAVEL_MAIL_PASSWORD: ${LARAVEL_MAIL_PASSWORD}
+      LARAVEL_MAIL_ENCRYPTION: ${LARAVEL_MAIL_ENCRYPTION}
+      LARAVEL_MAIL_FROM_ADDRESS: ${LARAVEL_MAIL_FROM_ADDRESS}
+      LARAVEL_MAIL_FROM_NAME: ${LARAVEL_MAIL_FROM_NAME}
+      LARAVEL_AWS_ACCESS_KEY_ID: ${LARAVEL_AWS_ACCESS_KEY_ID}
+      LARAVEL_AWS_SECRET_ACCESS_KEY: ${LARAVEL_AWS_SECRET_ACCESS_KEY}
+      LARAVEL_AWS_DEFAULT_REGION: ${LARAVEL_AWS_DEFAULT_REGION}
+      LARAVEL_AWS_BUCKET: ${LARAVEL_AWS_BUCKET}
+      LARAVEL_AWS_USE_PATH_STYLE_ENDPOINT: ${LARAVEL_AWS_USE_PATH_STYLE_ENDPOINT}
+      LARAVEL_VITE_APP_NAME: ${LARAVEL_VITE_APP_NAME}
+      LARAVEL_LTI1P3_ADMIN_USERNAME: ${LARAVEL_LTI1P3_ADMIN_USERNAME}
+      LARAVEL_LTI1P3_ADMIN_PASSWORD: ${LARAVEL_LTI1P3_ADMIN_PASSWORD}
+      FRONTEND_DOMAIN: ${FRONTEND_DOMAIN}
+      FRONTEND_ENTRYPOINT_URI: ${FRONTEND_ENTRYPOINT_URI}
+
+    image: "lti:0.1.0"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    volumes:
+      - type: bind
+        source: ${APP_CODE_DIR}
+        target: /var/www/html
+    restart: always
+    depends_on:
+      lti_rubric_resume_database:
+        condition: service_healthy
+    labels:
+      - "traefik.http.routers.lti.rule=Host(`${APP_DOMAIN}`)"
+      - "traefik.http.routers.lti.tls=true"
+      - "traefik.http.routers.lti.entrypoints=websecure"
+  lti_rubric_resume_frontend:
+    container_name: lti_rubric_resume_frontend
+    tty: true
+    build:
+      context: "."
+      dockerfile: "./Dockerfiles/Frontend"
+      args:
+        - FRONTEND_REPOSITORY=${FRONTEND_REPOSITORY}
+    image: lti_rubric_resume_frontend:0.1.0
+    restart: always
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    environment:
+      CHOKIDAR_USEPOLLING: true
+      APP_DOMAIN: ${APP_DOMAIN}
+      FRONTEND_DOMAIN: ${FRONTEND_DOMAIN}
+      VUE_PRODUCTION_MODE: ${VUE_PRODUCTION_MODE}
+    volumes:
+      - ${FRONTEND_CODE_DIR}:/usr/local/apache2/htdocs
+    labels:
+      - "traefik.http.routers.udecdash_frontend.rule=Host(`${FRONTEND_DOMAIN}`)"
+      - "traefik.http.routers.udecdash_frontend.tls=true"
+      - "traefik.http.routers.udecdash_frontend.entrypoints=websecure"
 volumes:
-  lti_db:
-    name: lti_db
+  lti_rubric_resume_db:
+    name: lti_rubric_resume_db
 networks:
   default:
     name: traefik_network

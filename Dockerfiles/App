@@ -55,6 +55,8 @@ ENV LARAVEL_AWS_USE_PATH_STYLE_ENDPOINT laravel_aws_use_path_style_endpoint_unde
 ENV LARAVEL_VITE_APP_NAME laravel_vite_app_name_undefined
 ENV LARAVEL_LTI1P3_ADMIN_USERNAME laravel_lti1p3_admin_username_undefined
 ENV LARAVEL_LTI1P3_ADMIN_PASSWORD laravel_lti1p3_admin_password_undefined
+ENV FRONTEND_ENTRYPOINT_URI no_value_passed
+ENV FRONTEND_DOMAIN no_value_passed
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 COPY /SettingsFiles/app/init.sh /tmp/init.sh
