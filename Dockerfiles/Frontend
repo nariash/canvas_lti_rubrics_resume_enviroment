@@ -1,0 +1,22 @@
+FROM httpd:2.4
+ARG FRONTEND_REPOSITORY
+ENV APP_DOMAIN APP_DOMAIN_UNDEFINED
+ENV FRONTEND_DOMAIN FRONTEND_DOMAIN_UNDEFINED
+ENV VUE_PRODUCTION_MODE false
+ADD https://github.com/krallin/tini/releases/download/v0.19.0/tini-amd64 /tini
+RUN \
+    apt-get update && \
+    apt-get install -y git unzip curl apache2
+RUN \
+    curl -sL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs && \
+    npm install -g @vue/cli
+RUN git clone $FRONTEND_REPOSITORY /tmp/pre_stage_frontend
+COPY /SettingsFiles/Frontend/.htaccess /tmp/pre_stage_frontend/public/.htaccess
+COPY /SettingsFiles/Frontend/init.sh /tmp/init.sh
+RUN chmod 755 /tini && chmod 755 /tmp/init.sh
+RUN a2enmod rewrite && \
+    echo "LoadModule rewrite_module modules/mod_rewrite.so" >> /usr/local/apache2/conf/httpd.conf
+EXPOSE 80
+RUN cp /usr/local/apache2/conf/httpd.conf /tmp/default_httpd.conf
+WORKDIR /usr/local/apache2/htdocs
+ENTRYPOINT ["/tini", "--", "/tmp/init.sh"]
